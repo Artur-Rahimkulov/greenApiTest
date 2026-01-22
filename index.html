@@ -14,12 +14,22 @@
         background-color: #f4f4f4;
       }
       .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background-color: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 5%;
+        max-width: 90%;
+      }
+      input {
+        width: 100%;
+        margin-bottom: 5px;
+        display: block;
+      }
+      button {
+        width: 100%;
+        height: 30px;
+        text-align: center;
+        margin-bottom: 5px;
+        display: block;
       }
       h1 {
         color: #333;
@@ -32,9 +42,10 @@
       }
       .json {
         color: #292626;
-        background-color: #f4f4f4;
+        background-color: #dadada;
         padding: 10px;
         border-radius: 4px;
+        height: 100%;
         font-size: 14px;
         white-space: pre-wrap;
         word-wrap: break-word;
@@ -47,14 +58,14 @@
           apiUrl: "",
           mediaUrl: "",
           idInstance: "",
-          apiTokenInstance: "",
+          apiTokenInstance:
+            "",
           chatId: "",
           message: "I use Green-API to send this message to you!",
           urlFile: "https://i.sstatic.net/GsMl9.jpg",
           fileName: "json.jpg",
           caption: "json",
         };
-        // for default
         $("#apiUrl").val(window.greenApi.apiUrl);
         $("#mediaUrl").val(window.greenApi.mediaUrl);
         $("#idInstance").val(window.greenApi.idInstance);
@@ -64,8 +75,6 @@
         $("#urlFile").val(window.greenApi.urlFile);
         $("#fileName").val(window.greenApi.fileName);
         $("#caption").val(window.greenApi.caption);
-
-        // for input
         $("#apiUrl").on("input", function () {
           window.greenApi.apiUrl = $(this).val();
         });
@@ -96,17 +105,18 @@
         $("#caption").on("input", function () {
           window.greenApi.caption = $(this).val();
         });
-        // for api
-        function request(url, method, data, callback) {
+        function request(url, method, data) {
           var xhr = new XMLHttpRequest();
           xhr.open(method, url, true);
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
               if (xhr.status === 200) {
-                callback(xhr.responseText);
+                $("#result").html(
+                  JSON.stringify(JSON.parse(xhr.responseText), null, 2),
+                );
               } else {
-                callback(xhr.statusText);
+                $("#result").html(xhr.statusText);
               }
             }
           };
@@ -116,24 +126,14 @@
           request(
             `${window.greenApi.apiUrl}/waInstance${window.greenApi.idInstance}/getSettings/${window.greenApi.apiTokenInstance}`,
             "GET",
-            {},
-            function (response) {
-              $("#getSettingsResult").html(
-                JSON.stringify(JSON.parse(response), null, 2),
-              );
-            },
+            {}
           );
         });
         $("#getStateInstance").on("click", function () {
           request(
             `${window.greenApi.apiUrl}/waInstance${window.greenApi.idInstance}/getStateInstance/${window.greenApi.apiTokenInstance}`,
             "GET",
-            {},
-            function (response) {
-              $("#getStateInstanceResult").html(
-                JSON.stringify(JSON.parse(response), null, 2),
-              );
-            },
+            {}
           );
         });
         $("#sendMessage").on("click", function () {
@@ -143,12 +143,7 @@
             {
               chatId: window.greenApi.chatId,
               message: window.greenApi.message,
-            },
-            function (response) {
-              $("#sendMessageResult").html(
-                JSON.stringify(JSON.parse(response), null, 2),
-              );
-            },
+            }
           );
         });
         $("#sendFileByUrl").on("click", function () {
@@ -160,12 +155,7 @@
               urlFile: window.greenApi.urlFile,
               fileName: window.greenApi.fileName,
               caption: window.greenApi.caption,
-            },
-            function (response) {
-              $("#sendFileByUrlResult").html(
-                JSON.stringify(JSON.parse(response), null, 2),
-              );
-            },
+            }
           );
         });
       });
@@ -173,71 +163,40 @@
   </head>
   <body>
     <div class="container">
-      <h2>Введите данные для API</h2>
       <div>
+        <h3>Введите данные для API</h3>
         <label for="apiUrl">API URL:</label>
         <input type="text" id="apiUrl" placeholder="Введите API URL" />
-      </div>
-
-      <div>
         <label for="mediaUrl">Media URL:</label>
         <input type="text" id="mediaUrl" placeholder="Введите Media URL" />
-      </div>
-
-      <div>
         <label for="idInstance">ID Instance:</label>
         <input type="text" id="idInstance" placeholder="Введите ID Instance" />
-      </div>
-
-      <div>
         <label for="apiTokenInstance">API Token Instance:</label>
         <input
           type="text"
           id="apiTokenInstance"
           placeholder="Введите API Token Instance"
         />
-      </div>
-      <h2>Вызов API</h2>
-      <h3>Получение настроек инстанса</h3>
-      <div>
-        <label for="getSettings">getSettings</label>
-        <button id="getSettings">Try it</button>
-        <p id="getSettingsResult" class="json"></p>
-      </div>
-      <div>
-        <label for="getStateInstance">getStateInstance</label>
-        <button id="getStateInstance">Try it</button>
-        <p id="getStateInstanceResult" class="json"></p>
-      </div>
-      <h3>Отправка сообщений</h3>
-      <div>
+        <h4>Получение настроек инстанса</h4>
+        <button id="getSettings">getSettings</button>
+        <button id="getStateInstance">getStateInstance</button>
+        <h3>Отправка сообщений</h3>
         <label for="chatId">chatId:</label>
         <input type="text" id="chatId" placeholder="Введите chatId" />
-        <br />
         <label for="message">message:</label>
         <input type="text" id="message" placeholder="Введите message" />
-        <br />
         <label for="urlFile">urlFile:</label>
         <input type="text" id="urlFile" placeholder="Введите urlFile" />
-        <br />
         <label for="fileName">fileName:</label>
         <input type="text" id="fileName" placeholder="Введите fileName" />
-        <br />
         <label for="caption">caption:</label>
         <input type="text" id="caption" placeholder="Введите caption" />
-        <br />
+        <button id="sendMessage">sendMessage</button>
+        <button id="sendFileByUrl">sendFileByUrl</button>
       </div>
-      <h4>Отправка текста</h4>
       <div>
-        <label for="sendMessage">sendMessage</label>
-        <button id="sendMessage">Try it</button>
-        <p id="sendMessageResult" class="json"></p>
-      </div>
-      <h4>Отправка файла</h4>
-      <div>
-        <label for="sendFileByUrl">sendFileByUrl</label>
-        <button id="sendFileByUrl">Try it</button>
-        <p id="sendFileByUrlResult" class="json"></p>
+        <h3>Ответ:</h3>
+        <p id="result" class="json"></p>
       </div>
     </div>
   </body>
